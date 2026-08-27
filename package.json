@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "node --env-file=.env.local scripts/seed.js"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
+    "lucide-react": "^1.34.0",
+    "neo4j-driver": "^6.2.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"
