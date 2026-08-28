@@ -429,25 +429,25 @@ Screenshots of the application are included below.
 
 ### Dashboard
 
-*Add dashboard screenshot here.*
+![Dashboard](./public/dashboard.png)
 
 ### Job Opportunities
 
-*Add jobs page screenshot here.*
+![Jobs](./public/jobs.png)
 
 ### Job Details
 
-*Add job details screenshot here.*
+![Job-Details](./public/job-details.png)
 
 ### Graph Explorer
 
-*Add graph explorer screenshot here.*
+![Graph-Explorer](./public/graph-explorer.png)
 
 ---
 
 # 🌐 Live Demo
 
-**Demo:** `<YOUR_VERCEL_URL>`
+**Demo:** `https://careergraph-black.vercel.app/`
 
 The live application is deployed using Vercel and connects to the hosted CognoDB instance.
 
@@ -459,7 +459,8 @@ The live application is deployed using Vercel and connects to the hosted CognoDB
 
 A short screen recording demonstrating the application is available here:
 
-`<YOUR_SCREEN_RECORDING_URL>`
+[![CareerGraph Demo Walkthrough](./public/thumbnail.png)](https://www.youtube.com/watch?v=tYos7ESvTfU)
+*Click the image above to watch the full demo video.*
 
 The walkthrough demonstrates:
 
