@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
+    "@xyflow/react": "^12.11.5",
     "dotenv": "^17.4.2",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.34.0",
