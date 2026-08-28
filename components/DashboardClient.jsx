@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import JobCard from "./jobs/JobCard";
 
 // Create a custom motion component for Next.js Link
 const MotionLink = motion(Link);
@@ -131,9 +132,12 @@ export default function DashboardClient({ user, data }) {
               </div>
 
               {data?.jobs?.length > 0 && (
-                <button className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer">
+                <Link
+                  href="/jobs"
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer"
+                >
                   View all
-                </button>
+                </Link>
               )}
             </div>
 
@@ -152,31 +156,7 @@ export default function DashboardClient({ user, data }) {
                   }
                 />
               ) : (
-                data.jobs.map((job) => (
-                  <motion.div
-                    key={job.id}
-                    whileHover={{ scale: 1.01, x: 2 }}
-                    transition={{ duration: 0.15 }}
-                    className="rounded-xl border border-slate-200/80 p-4 transition hover:border-indigo-200 hover:bg-slate-50/80"
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold text-slate-900 text-sm sm:text-base">
-                          {job.title}
-                        </h3>
-
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {job.company}
-                        </p>
-                      </div>
-
-                      <span className="shrink-0 rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
-                        {job.matchingSkills} skill
-                        {job.matchingSkills !== 1 ? "s" : ""} match
-                      </span>
-                    </div>
-                  </motion.div>
-                ))
+                data.jobs.map((job) => <JobCard key={job.id} job={job} />)
               )}
             </div>
           </div>

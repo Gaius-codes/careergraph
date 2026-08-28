@@ -65,7 +65,7 @@ export default async function DashboardLayout({ children }) {
             Analytics
           </div>
           <Link
-            href="/dashboard"
+            href="/"
             className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition"
           >
             <svg

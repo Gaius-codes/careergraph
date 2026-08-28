@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getDashboardData } from "@/lib/cognodb";
+import { getDashboardData } from "@/lib/cognodb/index";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function DashboardPage() {

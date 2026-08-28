@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   ReactFlow,
@@ -16,75 +15,101 @@ import {
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
+import { layoutGraph } from "@/lib/graph/layout";
 import NodeDetails from "./NodeDetails";
 
 // Node Type Design Map (Colors, Badges, Styles)
 const NODE_TYPES_CONFIG = {
   Person: {
     label: "PERSON",
+    borderColor: "#818cf8",
     border: "border-indigo-500",
     bg: "bg-indigo-500/10",
     text: "text-indigo-400",
+    dot: "bg-indigo-400 border-indigo-500",
   },
   Skill: {
     label: "SKILL",
+    borderColor: "#34d399",
     border: "border-emerald-500",
     bg: "bg-emerald-500/10",
     text: "text-emerald-400",
+    dot: "bg-emerald-400 border-emerald-500",
   },
   Project: {
     label: "PROJECT",
+    borderColor: "#fbbf24",
     border: "border-amber-500",
     bg: "bg-amber-500/10",
     text: "text-amber-400",
+    dot: "bg-amber-400 border-amber-500",
   },
   Technology: {
     label: "TECHNOLOGY",
+    borderColor: "#22d3ee",
     border: "border-cyan-500",
     bg: "bg-cyan-500/10",
     text: "text-cyan-400",
+    dot: "bg-cyan-400 border-cyan-500",
   },
   Job: {
     label: "JOB",
+    borderColor: "#fb7185",
     border: "border-rose-500",
     bg: "bg-rose-500/10",
     text: "text-rose-400",
+    dot: "bg-rose-400 border-rose-500",
   },
   Company: {
     label: "COMPANY",
+    borderColor: "#a78bfa",
     border: "border-violet-500",
     bg: "bg-violet-500/10",
     text: "text-violet-400",
+    dot: "bg-violet-400 border-violet-500",
   },
   Industry: {
     label: "INDUSTRY",
-    border: "border-orange-500",
-    bg: "bg-orange-500/10",
-    text: "text-orange-400",
+    borderColor: "#64748b",
+    border: "border-slate-500",
+    bg: "bg-slate-500/10",
+    text: "text-slate-400",
+    dot: "bg-slate-400 border-slate-500",
   },
 };
 
-// Custom ReactFlow Node Component for polished rendering
+// Custom ReactFlow Node Component with dynamic colors & styles
 function CustomGraphNode({ data, selected }) {
   const labelType = data.graphNode.labels?.[0] || "NODE";
   const config = NODE_TYPES_CONFIG[labelType] || {
     label: labelType,
+    borderColor: "#64748b",
     border: "border-slate-600",
     bg: "bg-slate-800",
     text: "text-slate-400",
   };
 
   const name =
-    data.graphNode.properties.name ||
-    data.graphNode.properties.title ||
-    data.graphNode.properties.label ||
+    data.graphNode.properties?.name ||
+    data.graphNode.properties?.title ||
+    data.graphNode.properties?.label ||
     data.graphNode.id;
 
   return (
     <div
-      className={`group relative min-w-[180px] rounded-xl border bg-slate-900/90 px-4 py-3 backdrop-blur-md transition-all duration-200 ${
-        config.border
-      } ${selected ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950 shadow-lg shadow-indigo-500/10" : "hover:shadow-md"}`}
+      style={{
+        borderRadius: "14px",
+        padding: "14px 16px",
+        background: "#0f172a",
+        color: "#fff",
+        borderColor: config.borderColor,
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
+      }}
+      className={`group relative min-w-[180px] border transition-all duration-200 ${
+        selected
+          ? "ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950 shadow-lg shadow-indigo-500/10"
+          : "hover:shadow-md"
+      }`}
     >
       <Handle
         type="target"
@@ -113,9 +138,11 @@ function CustomGraphNode({ data, selected }) {
   );
 }
 
-// Convert DB Nodes into React Flow nodes with Radial Positioning
+// Convert DB Nodes into React Flow nodes
 function convertNode(node, index = 0, total = 1) {
-  // Radial layout placement relative to center
+  const label = node.labels?.[0] || "NODE";
+  const config = NODE_TYPES_CONFIG[label] || { borderColor: "#64748b" };
+
   const radius = index === 0 ? 0 : 220 + Math.floor(index / 8) * 90;
   const angle =
     index === 0 ? 0 : ((index - 1) / Math.max(1, total - 1)) * 2 * Math.PI;
@@ -126,6 +153,14 @@ function convertNode(node, index = 0, total = 1) {
     position: {
       x: Math.cos(angle) * radius,
       y: Math.sin(angle) * radius,
+    },
+    style: {
+      borderRadius: "14px",
+      padding: "14px 16px",
+      background: "#0f172a",
+      color: "#fff",
+      border: `1px solid ${config.borderColor}`,
+      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
     },
     data: {
       graphNode: node,
@@ -180,8 +215,11 @@ export default function GraphExplorer() {
         const incomingNodes = data.connections.nodes;
         const incomingEdges = data.connections.edges;
 
+        let rawNodes = [];
+        let rawEdges = [];
+
         setNodes((currentNodes) => {
-          const existing = new Map(currentNodes.map((node) => [node.id, node]));
+          const existing = new Map(currentNodes.map((n) => [n.id, n]));
 
           incomingNodes.forEach((node, index) => {
             if (!existing.has(node.id)) {
@@ -192,24 +230,29 @@ export default function GraphExplorer() {
             }
           });
 
-          if (replace) {
-            return incomingNodes.map((node, index) =>
-              convertNode(node, index, incomingNodes.length),
-            );
-          }
+          rawNodes = replace
+            ? incomingNodes.map((node, index) =>
+                convertNode(node, index, incomingNodes.length),
+              )
+            : Array.from(existing.values());
 
-          return Array.from(existing.values());
+          return rawNodes;
         });
 
         setEdges((currentEdges) => {
-          const existing = new Map(currentEdges.map((edge) => [edge.id, edge]));
+          const existing = new Map(currentEdges.map((e) => [e.id, e]));
 
           incomingEdges.forEach((edge) => {
             existing.set(edge.id, convertEdges([edge])[0]);
           });
 
-          return Array.from(existing.values());
+          rawEdges = Array.from(existing.values());
+          return rawEdges;
         });
+
+        // Compute layout asynchronously before committing node positions
+        const positionedNodes = await layoutGraph(rawNodes, rawEdges);
+        setNodes(positionedNodes);
 
         setExpandedNodes((current) => new Set(current).add(nodeId));
       } catch (err) {
@@ -263,7 +306,6 @@ export default function GraphExplorer() {
         {/* Header Section */}
         <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            {/* Navigation & Badge Row */}
             <div className="mb-3 flex flex-wrap items-center gap-3">
               <Link
                 href="/dashboard"
@@ -316,6 +358,27 @@ export default function GraphExplorer() {
         {/* Graph & Panel Layout */}
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <section className="relative h-[calc(100vh-220px)] min-h-[600px] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 shadow-2xl backdrop-blur-xs">
+            {/* Legend Overlay */}
+            <div className="absolute left-4 top-4 z-10 rounded-xl border border-slate-800 bg-slate-950/90 p-3 backdrop-blur shadow-lg">
+              <p className="mb-2 text-[10px] font-semibold tracking-widest text-slate-500">
+                NODE TYPES
+              </p>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {Object.entries(NODE_TYPES_CONFIG).map(([type, config]) => (
+                  <div
+                    key={type}
+                    className="flex items-center gap-2 text-xs text-slate-400"
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${config.dot}`}
+                    />
+                    {type}
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {loading && nodes.length === 0 && (
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/75 backdrop-blur-sm">
                 <div className="text-center">
@@ -334,8 +397,14 @@ export default function GraphExplorer() {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodeClick={handleNodeClick}
+              nodesDraggable
+              nodesConnectable={false}
+              elementsSelectable
+              zoomOnScroll
+              zoomOnPinch
+              panOnDrag
               fitView
-              fitViewOptions={{ padding: 0.3 }}
+              fitViewOptions={{ padding: 0.25 }}
               minZoom={0.2}
               maxZoom={2}
             >
@@ -344,10 +413,7 @@ export default function GraphExplorer() {
               <MiniMap
                 nodeColor={(n) => {
                   const label = n.data?.graphNode?.labels?.[0];
-                  if (label === "Person") return "#6366f1";
-                  if (label === "Skill") return "#10b981";
-                  if (label === "Project") return "#f59e0b";
-                  return "#475569";
+                  return NODE_TYPES_CONFIG[label]?.borderColor || "#475569";
                 }}
                 maskColor="rgba(15, 23, 42, 0.75)"
                 className="!bg-slate-900 !border-slate-800 rounded-xl overflow-hidden"
